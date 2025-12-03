@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cronografías Universitarias</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* FONDO BLANCO Y TIPOGRAFÍA OSCURA */
+        body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: #ffffff; overflow: hidden; color: #333; }
+        #canvas-container { position: relative; width: 100vw; height: 100vh; cursor: crosshair; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        /* --- TÍTULO --- */
+        #header-info {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 100; text-align: center; pointer-events: none; width: 80%; 
+        }
+        #header-info h1 {
+            margin: 0; font-size: 1.8rem; font-weight: 800; color: #2d3436;
+            letter-spacing: -0.5px; text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+        }
+        #header-info h2 {
+            margin: 0; font-size: 0.95rem; font-weight: 500; color: #636e72; margin-top: 5px;
+        }
+
+        /* --- RELOJ --- */
+        #clock {
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            font-size: 2.2rem; font-weight: 800; background: rgba(255,255,255,0.9);
+            color: #2d3436; padding: 2px 25px; border-radius: 20px; z-index: 10;
+            border: 1px solid #dfe6e9; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- FIRMA AUTOR --- */
+        #footer-info {
+            position: absolute; bottom: 15px; left: 20px; z-index: 100; pointer-events: none;
+        }
+        .author-badge {
+            display: inline-block; background: #fff; border: 1px solid #dfe6e9;
+            padding: 8px 20px; border-radius: 30px;
+            font-size: 0.85rem; font-weight: bold; color: #0984e3;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        /* Controles Velocidad */
+        #speed-controls {
+            position: absolute; top: 20px; left: 20px; z-index: 100; display: flex; gap: 10px;
+        }
+        .speed-btn {
+            background: #f1f2f6; color: #636e72; border: 1px solid #ced6e0;
+            padding: 8px 18px; border-radius: 15px; cursor: pointer; font-size: 0.85rem;
+            transition: all 0.2s; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .speed-btn:hover { background: #dfe4ea; color: #2f3542; }
+        .speed-btn.active {
+            background: #74b9ff; color: white; border-color: #74b9ff;
+            box-shadow: 0 2px 10px rgba(116, 185, 255, 0.4);
+        }
+        
+        /* ETIQUETAS MEJORADAS CON PORCENTAJE */
+        .label {
+            position: absolute; font-size: 0.65rem; font-weight: bold; color: #636e72;
+            border: 1px solid #dfe6e9; width: 85px; height: 60px; border-radius: 12px;
+            display: flex; flex-direction: column; /* Apilar texto y porcentaje */
+            align-items: center; justify-content: center; text-align: center; 
+            pointer-events: none; background: rgba(255,255,255,0.85); padding: 4px;
+            transform: translate(-50%, -50%); transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        /* Estilo del número de porcentaje */
+        .pct-indicator {
+            font-size: 0.8rem;
+            color: #0984e3;
+            margin-top: 2px;
+        }
+
+        /* Centro (Traslado) */
+        .label.center-activity {
+            width: 110px; height: 110px; border-radius: 50%;
+            border: 2px dashed #b2bec3; background: rgba(240, 240, 240, 0.5);
+            font-size: 0.8rem; color: #2d3436; z-index: 5;
+        }
+        .label.center-activity .pct-indicator {
+            font-size: 1.1rem; font-weight: 800;
+        }
+
+        #tooltip {
+            position: absolute; display: none; background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #dfe6e9; color: #2d3436; padding: 12px;
+            border-radius: 8px; pointer-events: none; z-index: 1000; font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Panel Datos */
+        #data-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.98); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #fff; padding: 30px; border-radius: 15px; width: 95%; max-width: 1200px;
+            text-align: center; border: 1px solid #eee; height: 80vh; display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%; flex-grow: 1; background: #f8f9fa; color: #2d3436; border: 1px solid #dfe6e9;
+            padding: 10px; font-family: 'Consolas', monospace; margin-top: 10px; font-size: 0.75rem; border-radius: 5px;
+            white-space: pre; overflow: auto;
+        }
+        button {
+            background: #74b9ff; color: white; border: none; padding: 12px 40px;
+            font-size: 1.1rem; margin-top: 20px; cursor: pointer; border-radius: 50px;
+            font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 10px rgba(116, 185, 255, 0.4);
+        }
+        button:hover { background: #0984e3; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<div id="header-info">
+    <h1>Cronografías Universitarias</h1>
+    <h2>Visualización de patrones de uso del tiempo</h2>
+</div>
+
+<div id="footer-info">
+    <div class="author-badge">Elaborado por: Adrián Eduardo Pech Quijano</div>
+</div>
+
+<div id="data-modal">
+    <div class="modal-content">
+        <h2 style="margin: 0 0 10px 0; color:#2d3436">📊 Carga de Datos: Matriz 30 Minutos</h2>
+        <p style="color: #636e72; margin: 0 0 10px 0; font-size: 0.9rem;">
+            Pega tu CSV aquí.
+        </p>
+<textarea id="csv-input">
+ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00
+1,Economia,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Comer y beber,Convivir con familia,Convivir con familia,Socializar,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Cuidado personal,Cuidado personal,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
+2,Polacas,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Convivir con familia,Socializar,Socializar,Clases en la facultad,Clases en la facultad,Traslado,Tareas del hogar,Convivir con familia,Convivir con familia,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
+3,Antropologia,Dormir,Dormir,Cuidado personal,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Socializar,Socializar,Comer y beber,Comer y beber,Clases extracurriculares,Clases extracurriculares,Tareas y estudio,Tareas y estudio,Entretenimiento,Entretenimiento,Traslado,Convivir con familia,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
+</textarea>
+        <button onclick="startSimulation()">▶ Iniciar Visualización</button>
+    </div>
+</div>
+
+<div id="canvas-container">
+    <div id="clock">06:00</div>
+    <div id="speed-controls">
+        <button class="speed-btn" onclick="setSpeed(200, this)">Lento</button>
+        <button class="speed-btn active" onclick="setSpeed(60, this)">Medio</button>
+        <button class="speed-btn" onclick="setSpeed(15, this)">Rápido</button>
+    </div>
+    
+    <div id="labels-container"></div>
+    <div id="tooltip"></div>
+    <canvas id="simulation"></canvas>
+</div>
+
+<script>
+    const canvas = document.getElementById("simulation");
+    const context = canvas.getContext("2d", { alpha: false });
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const centers = {
+        "Traslado":                 { x: 0.50, y: 0.50 }, 
+        "Dormir":                   { x: 0.15, y: 0.15 },
+        "Cuidado personal":         { x: 0.32, y: 0.15 },
+        "Preparar alimentos":       { x: 0.50, y: 0.15 },
+        "Comer y beber":            { x: 0.68, y: 0.15 },
+        "Tareas del hogar":         { x: 0.85, y: 0.15 },
+        "Socializar":               { x: 0.10, y: 0.85 },
+        "Convivir con familia":     { x: 0.26, y: 0.85 }, 
+        "Entretenimiento":          { x: 0.42, y: 0.85 },
+        "Ejercicio y/o deporte":    { x: 0.58, y: 0.85 },
+        "Clases extracurriculares": { x: 0.74, y: 0.85 },
+        "Otras actividades":        { x: 0.90, y: 0.85 },
+        "Pagar cuentas":            { x: 0.15, y: 0.32 },
+        "Comprar comida":           { x: 0.15, y: 0.50 },
+        "Religión":                 { x: 0.15, y: 0.68 },
+        "Clases en la facultad":    { x: 0.85, y: 0.32 },
+        "Trabajar":                 { x: 0.85, y: 0.50 },
+        "Tareas y estudio":         { x: 0.85, y: 0.68 }
+    };
+
+    function createLabels() {
+        const container = document.getElementById('labels-container');
+        container.innerHTML = '';
+        Object.keys(centers).forEach(key => {
+            const div = document.createElement('div');
+            div.className = 'label';
+            if (key === "Traslado") div.classList.add("center-activity");
+            
+            div.style.left = (centers[key].x * width) + 'px';
+            div.style.top = (centers[key].y * height) + 'px';
+            
+            // Creamos estructura interna: Nombre + Porcentaje
+            // Usamos un ID sanitizado para actualizar el numero despues
+            const safeId = key.replace(/\s+/g, '-').toLowerCase();
+            div.innerHTML = `
+                <div>${key}</div>
+                <div id="pct-${safeId}" class="pct-indicator">0%</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    let nodes = [];
+    let simulation;
+    let clockInterval; 
+    let time = 360; 
+
+    const pastelColors = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
+    const colorScale = d3.scaleOrdinal(pastelColors); 
+
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        const headers = lines[0].split(',');
+        const parsedNodes = [];
+        const toMin = (t) => {
+            if(!t) return 0;
+            const [h, m] = t.trim().split(':').map(Number);
+            return (h * 60) + m;
+        };
+        const timeCols = headers.map((h, i) => ({ header: h.trim(), index: i })).filter(c => c.header.includes(":"));
+
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].split(',');
+            if (row.length < 3) continue;
+            const id = row[0]; const grupo = row[1];
+            let schedule = [];
+            for (let j = 0; j < timeCols.length; j++) {
+                const col = timeCols[j];
+                const startTime = toMin(col.header);
+                const endTime = startTime + 30; 
+                const activity = row[col.index] ? row[col.index].trim() : "Dormir";
+                if (schedule.length > 0 && schedule[schedule.length - 1].act === activity) {
+                    schedule[schedule.length - 1].until = endTime;
+                } else {
+                    schedule.push({ until: endTime, act: activity });
+                }
+            }
+            if (schedule.length > 0 && schedule[schedule.length - 1].until < 1440) {
+                 schedule.push({ until: 1440, act: "Dormir" });
+            }
+            parsedNodes.push({
+                id: id, group: grupo, schedule: schedule,
+                x: width / 2, y: height / 2,
+                currentActivity: "Dormir",
+                targetX: centers["Dormir"].x * width, targetY: centers["Dormir"].y * height,
+                color: colorScale(grupo) 
+            });
+        }
+        return parsedNodes;
+    }
+
+    function startSimulation() {
+        createLabels();
+        const csvInput = document.getElementById("csv-input").value;
+        let data = parseCSV(csvInput);
+        nodes = [];
+        data.forEach(realNode => { 
+            for(let i=0; i<1; i++){  //
+                nodes.push({
+                    ...realNode, id: realNode.id + "-v" + i, 
+                    x: (width/2) + (Math.random()*20 - 10), y: (height/2) + (Math.random()*20 - 10),
+                    schedule: realNode.schedule.map(s => ({...s, until: s.until + (Math.random()*10 - 5)})) 
+                });
+            }
+        });
+        document.getElementById("data-modal").style.display = "none";
+        
+        simulation = d3.forceSimulation(nodes)
+            .alphaMin(0.001).velocityDecay(0.35) 
+            .force("charge", d3.forceManyBody().strength(-2)) 
+            .force("collide", d3.forceCollide().radius(3).strength(0.6))
+            .on("tick", render);
+        startClock(60); 
+    }
+
+    function render() {
+        context.fillStyle = "rgba(255, 255, 255, 0.25)"; 
+        context.fillRect(0, 0, width, height);
+        let hoveredNode = null;
+        nodes.forEach(node => {
+            node.x += (node.targetX - node.x) * 0.06;
+            node.y += (node.targetY - node.y) * 0.06;
+            context.beginPath(); context.arc(node.x, node.y, 4, 0, 2 * Math.PI);
+            context.fillStyle = node.color; context.fill();
+            if (mousePos) {
+                const dist = Math.hypot(mousePos.x - node.x, mousePos.y - node.y);
+                if (dist < 10) hoveredNode = node;
+            }
+        });
+        const tooltip = document.getElementById("tooltip");
+        if (hoveredNode) {
+            tooltip.style.display = "block";
+            tooltip.style.left = (hoveredNode.x + 15) + "px"; tooltip.style.top = (hoveredNode.y - 15) + "px";
+            tooltip.innerHTML = `<strong style="color:#74b9ff">${hoveredNode.group}</strong><br>${hoveredNode.currentActivity}`;
+            context.beginPath(); context.arc(hoveredNode.x, hoveredNode.y, 8, 0, 2 * Math.PI);
+            context.strokeStyle = "#2d3436"; context.lineWidth = 2; context.stroke();
+        } else { tooltip.style.display = "none"; }
+    }
+
+    // --- NUEVA FUNCIÓN: Actualizar Porcentajes en Vivo ---
+    function updatePercentages() {
+        const counts = {};
+        // Inicializar contadores
+        Object.keys(centers).forEach(key => counts[key] = 0);
+        // Fallback para errores de nombre
+        counts["Otras actividades"] = 0; 
+
+        // Contar dónde está cada nodo
+        nodes.forEach(node => {
+            if (counts[node.currentActivity] !== undefined) {
+                counts[node.currentActivity]++;
+            } else {
+                counts["Otras actividades"]++;
+            }
+        });
+
+        const total = nodes.length;
+        
+        // Actualizar el DOM
+        Object.keys(centers).forEach(key => {
+            const safeId = key.replace(/\s+/g, '-').toLowerCase();
+            const el = document.getElementById(`pct-${safeId}`);
+            if (el) {
+                const count = counts[key] || 0;
+                // Calculamos porcentaje sin decimales
+                const percent = ((count / total) * 100).toFixed(0);
+                el.innerText = percent + "%";
+                
+                // Efecto visual: si hay gente, ponerlo azul fuerte, si no, gris suave
+                el.style.color = count > 0 ? "#0984e3" : "#b2bec3";
+            }
+        });
+    }
+
+    function startClock(delay) {
+        if (clockInterval) clearInterval(clockInterval);
+        const clockDiv = document.getElementById("clock");
+        clockInterval = setInterval(() => {
+            time += 5; if (time >= 1440) time = 0;
+            let hours = Math.floor(time / 60); let mins = time % 60;
+            clockDiv.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+
+            nodes.forEach(node => {
+                const task = node.schedule.find(t => time < t.until);
+                if (task) {
+                    node.currentActivity = task.act;
+                    if(centers[task.act]) {
+                        node.targetX = centers[task.act].x * width; node.targetY = centers[task.act].y * height;
+                    } else {
+                        node.targetX = centers["Otras actividades"].x * width; node.targetY = centers["Otras actividades"].y * height;
+                    }
+                }
+            });
+            
+            // Actualizar los porcentajes en cada tick del reloj
+            updatePercentages();
+            
+            simulation.alpha(0.15).restart();
+        }, delay);
+    }
+
+    function setSpeed(delay, btnElement) {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+        startClock(delay);
+    }
+
+    let mousePos = null;
+    canvas.addEventListener("mousemove", e => {
+        const rect = canvas.getBoundingClientRect();
+        mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    });
+    canvas.addEventListener("mouseleave", () => mousePos = null);
+</script>
+</body>
+</html>
