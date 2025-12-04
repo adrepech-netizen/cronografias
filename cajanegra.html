@@ -2,207 +2,257 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cronografías Universitarias</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* FONDO BLANCO Y TIPOGRAFÍA OSCURA */
-        body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: #ffffff; overflow: hidden; color: #333; }
-        #canvas-container { position: relative; width: 100vw; height: 100vh; cursor: crosshair; }
-        canvas { display: block; width: 100%; height: 100%; }
+        /* ESTILOS BASE */
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #ffffff !important; 
+            overflow: hidden; color: #333; 
+        }
+
+        #main-wrapper {
+            position: relative; width: 100%; height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        canvas { 
+            display: block; width: 100%; height: 100%; 
+            position: absolute; top: 0; left: 0; z-index: 0;
+        }
         
-        /* --- TÍTULO --- */
-        #header-info {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            z-index: 100; text-align: center; pointer-events: none; width: 80%; 
-        }
-        #header-info h1 {
-            margin: 0; font-size: 1.8rem; font-weight: 800; color: #2d3436;
-            letter-spacing: -0.5px; text-transform: uppercase;
-            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
-        }
-        #header-info h2 {
-            margin: 0; font-size: 0.95rem; font-weight: 500; color: #636e72; margin-top: 5px;
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none; 
         }
 
-        /* --- RELOJ --- */
-        #clock {
-            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
-            font-size: 2.2rem; font-weight: 800; background: rgba(255,255,255,0.9);
-            color: #2d3436; padding: 2px 25px; border-radius: 20px; z-index: 10;
-            border: 1px solid #dfe6e9; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        /* HEADER ADAPTABLE */
+        .header-container {
+            width: 100%; display: flex; justify-content: center;
+            padding-top: 10px; pointer-events: auto;
         }
 
-        /* --- FIRMA AUTOR --- */
-        #footer-info {
-            position: absolute; bottom: 15px; left: 20px; z-index: 100; pointer-events: none;
+        .title-box {
+            text-align: center;
+            background: rgba(255,255,255,0.85);
+            padding: 5px 15px; border-radius: 15px;
+            backdrop-filter: blur(2px);
         }
-        .author-badge {
-            display: inline-block; background: #fff; border: 1px solid #dfe6e9;
-            padding: 8px 20px; border-radius: 30px;
-            font-size: 0.85rem; font-weight: bold; color: #0984e3;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        .title-box h1 {
+            margin: 0; font-size: 1.5rem; font-weight: 800; color: #2d3436; text-transform: uppercase;
+        }
+        .title-box h2 {
+            margin: 0; font-size: 0.85rem; font-weight: 500; color: #636e72;
         }
 
-        /* Controles Velocidad */
-        #speed-controls {
-            position: absolute; top: 20px; left: 20px; z-index: 100; display: flex; gap: 10px;
+        /* CONTROLES Y RELOJ */
+        .controls-area {
+            position: absolute; top: 15px; left: 15px;
+            display: flex; gap: 5px; pointer-events: auto;
         }
+        
         .speed-btn {
             background: #f1f2f6; color: #636e72; border: 1px solid #ced6e0;
-            padding: 8px 18px; border-radius: 15px; cursor: pointer; font-size: 0.85rem;
-            transition: all 0.2s; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; font-weight: bold;
+            transition: all 0.2s;
         }
-        .speed-btn:hover { background: #dfe4ea; color: #2f3542; }
-        .speed-btn.active {
-            background: #74b9ff; color: white; border-color: #74b9ff;
-            box-shadow: 0 2px 10px rgba(116, 185, 255, 0.4);
+        .speed-btn.active { background: #74b9ff; color: white; border-color: #74b9ff; }
+
+        #clock {
+            position: absolute; top: 15px; right: 15px;
+            font-size: 1.8rem; font-weight: 800; 
+            background: rgba(255,255,255,0.9); color: #2d3436;
+            padding: 2px 15px; border-radius: 12px; border: 1px solid #dfe6e9;
+            pointer-events: auto;
         }
-        
-        /* ETIQUETAS MEJORADAS CON PORCENTAJE */
+
+        /* FOOTER */
+        .footer-info {
+            position: absolute; bottom: 10px; left: 15px; pointer-events: auto;
+        }
+        .author-badge {
+            background: rgba(255,255,255,0.9); border: 1px solid #dfe6e9;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: bold; color: #0984e3;
+        }
+
+        /* ETIQUETAS */
         .label {
             position: absolute; font-size: 0.65rem; font-weight: bold; color: #636e72;
-            border: 1px solid #dfe6e9; width: 85px; height: 60px; border-radius: 12px;
-            display: flex; flex-direction: column; /* Apilar texto y porcentaje */
-            align-items: center; justify-content: center; text-align: center; 
-            pointer-events: none; background: rgba(255,255,255,0.85); padding: 4px;
-            transform: translate(-50%, -50%); transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1); width: 85px; height: 55px; border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; 
+            pointer-events: none; background: rgba(255,255,255,0.7); padding: 2px;
+            transform: translate(-50%, -50%); transition: top 0.3s, left 0.3s;
+            z-index: 5;
         }
-        /* Estilo del número de porcentaje */
-        .pct-indicator {
-            font-size: 0.8rem;
-            color: #0984e3;
-            margin-top: 2px;
-        }
+        .pct-indicator { font-size: 0.8rem; color: #0984e3; margin-top: 1px; }
 
-        /* Centro (Traslado) */
-        .label.center-activity {
-            width: 110px; height: 110px; border-radius: 50%;
-            border: 2px dashed #b2bec3; background: rgba(240, 240, 240, 0.5);
-            font-size: 0.8rem; color: #2d3436; z-index: 5;
+        .label.center-activity { 
+            width: 100px; height: 100px; border-radius: 50%;
+            border: 2px dashed #b2bec3; background: rgba(245, 245, 245, 0.5);
+            font-size: 0.8rem; color: #2d3436;
         }
-        .label.center-activity .pct-indicator {
-            font-size: 1.1rem; font-weight: 800;
-        }
+        .label.center-activity .pct-indicator { font-size: 1.1rem; font-weight: 800; }
 
         #tooltip {
-            position: absolute; display: none; background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #dfe6e9; color: #2d3436; padding: 12px;
-            border-radius: 8px; pointer-events: none; z-index: 1000; font-size: 0.9rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: absolute; display: none; background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #dfe6e9; color: #2d3436; padding: 10px;
+            border-radius: 8px; pointer-events: none; z-index: 1000; font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); left: 50%; top: 50%; transform: translate(-50%, -50%);
         }
-        
-        /* Panel Datos */
-        #data-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.98); z-index: 2000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+
+        /* MEDIA QUERIES (CELULAR) */
+        @media (max-width: 768px) {
+            .title-box h1 { font-size: 1rem; } 
+            .title-box h2 { display: none; } 
+            
+            #clock { 
+                font-size: 1.2rem; top: 50px; right: 50%; transform: translateX(50%); 
+                background: rgba(255,255,255,0.6);
+            }
+            
+            .controls-area { 
+                top: 50px; left: 10px; opacity: 0.8; 
+                transform: scale(0.8); transform-origin: left top; 
+            }
+
+            .label {
+                width: 60px; height: 40px; font-size: 0.5rem; 
+                background: rgba(255,255,255,0.6);
+            }
+            .label.center-activity { width: 70px; height: 70px; font-size: 0.6rem; }
+            .pct-indicator { font-size: 0.7rem; }
+            
+            .author-badge { font-size: 0.6rem; padding: 3px 8px; bottom: 5px; left: 5px;}
         }
-        .modal-content {
-            background: #fff; padding: 30px; border-radius: 15px; width: 95%; max-width: 1200px;
-            text-align: center; border: 1px solid #eee; height: 80vh; display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        textarea {
-            width: 100%; flex-grow: 1; background: #f8f9fa; color: #2d3436; border: 1px solid #dfe6e9;
-            padding: 10px; font-family: 'Consolas', monospace; margin-top: 10px; font-size: 0.75rem; border-radius: 5px;
-            white-space: pre; overflow: auto;
-        }
-        button {
-            background: #74b9ff; color: white; border: none; padding: 12px 40px;
-            font-size: 1.1rem; margin-top: 20px; cursor: pointer; border-radius: 50px;
-            font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 10px rgba(116, 185, 255, 0.4);
-        }
-        button:hover { background: #0984e3; transform: scale(1.05); }
     </style>
 </head>
 <body>
 
-<div id="header-info">
-    <h1>Cronografías Universitarias</h1>
-    <h2>Visualización de patrones de uso del tiempo</h2>
-</div>
+<div id="main-wrapper">
+    <div id="ui-layer">
+        
+        <div class="header-container">
+            <div class="title-box">
+                <h1>Cronografías Universitarias</h1>
+                <h2>Visualización de patrones de uso del tiempo</h2>
+            </div>
+        </div>
 
-<div id="footer-info">
-    <div class="author-badge">Elaborado por: Adrián Eduardo Pech Quijano</div>
-</div>
+        <div class="controls-area">
+            <div id="speed-controls">
+                <button class="speed-btn" onclick="setSpeed(200, this)">Lento</button>
+                <button class="speed-btn active" onclick="setSpeed(60, this)">Medio</button>
+                <button class="speed-btn" onclick="setSpeed(15, this)">Rápido</button>
+            </div>
+        </div>
 
-<div id="data-modal">
-    <div class="modal-content">
-        <h2 style="margin: 0 0 10px 0; color:#2d3436">📊 Carga de Datos: Matriz 30 Minutos</h2>
-        <p style="color: #636e72; margin: 0 0 10px 0; font-size: 0.9rem;">
-            Pega tu CSV aquí.
-        </p>
-<textarea id="csv-input">
-ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00
-1,Economia,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Comer y beber,Convivir con familia,Convivir con familia,Socializar,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Cuidado personal,Cuidado personal,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
-2,Polacas,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Convivir con familia,Socializar,Socializar,Clases en la facultad,Clases en la facultad,Traslado,Tareas del hogar,Convivir con familia,Convivir con familia,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
-3,Antropologia,Dormir,Dormir,Cuidado personal,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Socializar,Socializar,Comer y beber,Comer y beber,Clases extracurriculares,Clases extracurriculares,Tareas y estudio,Tareas y estudio,Entretenimiento,Entretenimiento,Traslado,Convivir con familia,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
-</textarea>
-        <button onclick="startSimulation()">▶ Iniciar Visualización</button>
+        <div id="clock">06:00</div>
+
+        <div id="labels-container"></div> 
+
+        <div class="footer-info">
+            <div class="author-badge">Elaborado por: Adrián Eduardo Pech Quijano</div>
+        </div>
     </div>
-</div>
 
-<div id="canvas-container">
-    <div id="clock">06:00</div>
-    <div id="speed-controls">
-        <button class="speed-btn" onclick="setSpeed(200, this)">Lento</button>
-        <button class="speed-btn active" onclick="setSpeed(60, this)">Medio</button>
-        <button class="speed-btn" onclick="setSpeed(15, this)">Rápido</button>
-    </div>
-    
-    <div id="labels-container"></div>
     <div id="tooltip"></div>
     <canvas id="simulation"></canvas>
 </div>
 
 <script>
+    // --- 1. DATOS (CSV) ---
+    const misDatosReales = `
+ID,Grupo ,Género,00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30
+1,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Preparar alimentos,Tareas del hogar,Tareas del hogar,Tareas del hogar,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Convivir con familia,Convivir con familia,Preparar alimentos,Comer y beber,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir
+2,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Socializar,Traslado,Traslado,Comer y beber,Convivir con familia,Entretenimiento,Tareas del hogar,Entretenimiento,Convivir con familia,Entretenimiento,Entretenimiento,Cuidado personal,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir
+3,Economia,Mujer,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Comer y beber,Convivir con familia,Cuidado personal,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Otras actividades,Preparar alimentos,Comer y beber,Entretenimiento,Entretenimiento,Tareas y estudio
+4,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Tareas del hogar,Preparar alimentos,Comer y beber,Cuidado personal,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Cuidado personal,Convivir con familia,Preparar alimentos,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir
+5,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Comer y beber,Cuidado personal,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Cuidado personal,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Traslado,Convivir con familia,Convivir con familia,Comer y beber,Cuidado personal,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Dormir,Dormir
+6,Economia,Mujer,Tareas y estudio,Tareas y estudio,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Preparar alimentos,Comer y beber,Tareas del hogar,Dormir,Entretenimiento,Clases extracurriculares,Clases extracurriculares,Clases extracurriculares,Clases extracurriculares,Clases extracurriculares,Traslado,Socializar,Comprar comida,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Tareas y estudio
+7,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Comer y beber,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Entretenimiento,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Comprar comida,Comer y beber,Cuidado personal,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Cuidado personal,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir
+8,Economia,Hombre,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar,Tareas del hogar,Tareas y estudio
+9,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Comer y beber,Traslado,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Traslado,Comer y beber,Tareas y estudio,Tareas y estudio,Otras actividades,Cuidado personal,Otras actividades,Otras actividades,Otras actividades,Religi�n,Religi�n,Convivir con familia,Preparar alimentos,Comer y beber,Convivir con familia,Otras actividades,Otras actividades,Dormir,Dormir
+10,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Preparar alimentos,Cuidado personal,Traslado,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Traslado,Comer y beber,Tareas del hogar,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Cuidado personal,Comer y beber,Entretenimiento,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir
+11,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Comer y beber,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Preparar alimentos,Comer y beber,Convivir con familia,Cuidado personal,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Tareas del hogar,Convivir con familia,Entretenimiento,Comer y beber,Otras actividades,Entretenimiento,Dormir,Dormir,Dormir,Dormir
+12,Economia,Hombre,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Preparar alimentos,Comer y beber,Traslado,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Traslado,Preparar alimentos,Comer y beber,Tareas del hogar,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Entretenimiento,Convivir con familia,Entretenimiento,Ejercicio y/o deporte,Ejercicio y/o deporte,Socializar
+13,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Otras actividades,Preparar alimentos,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Otras actividades,Otras actividades,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Preparar alimentos,Comer y beber,Comer y beber,Tareas del hogar,Tareas del hogar,Tareas del hogar,Tareas del hogar,Trabajar,Trabajar,Trabajar,Trabajar,Cuidado personal,Entretenimiento,Entretenimiento,Dormir,Dormir
+14,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Preparar alimentos,Comer y beber,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Comprar comida,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Comer y beber,Cuidado personal,Tareas y estudio,Tareas y estudio,Otras actividades,Otras actividades,Traslado,Socializar,Traslado,Comer y beber,Cuidado personal,Convivir con familia,Entretenimiento,Dormir,Dormir
+15,Economia,Hombre,Cuidado personal,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas del hogar,Tareas del hogar,Preparar alimentos,Cuidado personal,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Tareas del hogar,Convivir con familia,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio
+16,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Comer y beber,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Cuidado personal,Tareas y estudio,Dormir,Dormir
+17,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Preparar alimentos,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Tareas del hogar,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Cuidado personal,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Preparar alimentos,Comer y beber,Cuidado personal,Tareas y estudio,Tareas y estudio,Tareas del hogar,Entretenimiento,Dormir
+18,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Preparar alimentos,Comer y beber,Dormir,Dormir,Tareas del hogar,Entretenimiento,Cuidado personal,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
+19,Economia,Mujer,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Comer y beber,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comprar comida,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Comprar comida,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio
+20,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Comer y beber,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Traslado,Preparar alimentos,Preparar alimentos,Comer y beber,Convivir con familia,Tareas del hogar,Tareas del hogar,Convivir con familia,Entretenimiento,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Convivir con familia,Dormir,Dormir
+21,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Entretenimiento,Entretenimiento,Entretenimiento,Convivir con familia,Comer y beber,Dormir,Dormir,Tareas y estudio,Tareas y estudio,Tareas y estudio,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar,Socializar
+22,Economia,Mujer,Entretenimiento,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Traslado,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Socializar,Socializar,Traslado,Tareas del hogar,Tareas y estudio,Tareas y estudio,Comer y beber,Cuidado personal,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Otras actividades,Otras actividades,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Dormir
+23,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Comer y beber,Comer y beber,Tareas del hogar,Tareas del hogar,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Preparar alimentos,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio
+24,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Preparar alimentos,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Cuidado personal,Preparar alimentos,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Entretenimiento,Comer y beber,Otras actividades,Otras actividades,Entretenimiento,Entretenimiento,Dormir
+25,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Traslado,Tareas del hogar,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Traslado,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Cuidado personal,Preparar alimentos,Comer y beber,Tareas del hogar,Tareas y estudio,Tareas y estudio,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Dormir
+26,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Preparar alimentos,Cuidado personal,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Preparar alimentos,Comer y beber,Comer y beber,Entretenimiento,Entretenimiento,Tareas y estudio,Tareas y estudio,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Clases extracurriculares,Clases extracurriculares,Clases extracurriculares,Otras actividades,Otras actividades,Comer y beber,Pagar cuentas,Cuidado personal,Entretenimiento
+27,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Preparar alimentos,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Comer y beber,Convivir con familia,Otras actividades,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Ejercicio y/o deporte,Traslado,Cuidado personal,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Tareas y estudio,Dormir
+28,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Comer y beber,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Traslado,Convivir con familia,Convivir con familia,Traslado,Traslado,Comer y beber,Comer y beber,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Preparar alimentos,Comer y beber,Comer y beber,Entretenimiento,Entretenimiento,Dormir,Dormir
+29,Economia,Hombre,Cuidado personal,Cuidado personal,Comer y beber,Entretenimiento,Entretenimiento,Entretenimiento,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Socializar,Socializar,Traslado,Traslado,Comer y beber,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Convivir con familia,Convivir con familia,Entretenimiento,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Comer y beber,Tareas y estudio,Entretenimiento
+30,Economia,Hombre,Cuidado personal,Cuidado personal,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Preparar alimentos,Traslado,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Traslado,Comer y beber,Dormir,Dormir,Entretenimiento,Comer y beber,Comer y beber,Entretenimiento,Entretenimiento,Entretenimiento,Cuidado personal,Entretenimiento,Preparar alimentos,Comer y beber,Comer y beber,Comer y beber,Otras actividades,Dormir,Convivir con familia,Dormir,Dormir
+31,Economia,Hombre,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas y estudio,Tareas y estudio,Comer y beber,Otras actividades,Tareas del hogar,Tareas del hogar,Tareas del hogar,Convivir con familia,Convivir con familia,Convivir con familia,Comer y beber,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Traslado,Traslado,Comer y beber,Convivir con familia,Tareas y estudio
+32,Economia,Hombre,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Preparar alimentos,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comprar comida,Traslado,Tareas del hogar,Tareas del hogar,Comer y beber,Comer y beber,Entretenimiento,Entretenimiento,Ejercicio y/o deporte,Comer y beber,Tareas y estudio,Tareas y estudio,Otras actividades,Otras actividades,Preparar alimentos,Comer y beber,Convivir con familia,Comer y beber,Entretenimiento,Entretenimiento,Tareas y estudio
+33,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Comer y beber,Tareas y estudio,Tareas y estudio,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Comer y beber,Clases en la facultad,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Traslado,Comer y beber,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio
+34,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Preparar alimentos,Cuidado personal,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Otras actividades,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Comer y beber,Otras actividades,Otras actividades,Clases en la facultad,Clases en la facultad,Tareas del hogar,Tareas y estudio,Entretenimiento,Entretenimiento,Cuidado personal,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Dormir
+35,Economia,Mujer,Cuidado personal,Preparar alimentos,Entretenimiento,Entretenimiento,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Cuidado personal,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Clases en la facultad,Clases en la facultad,Comer y beber,Comer y beber,Traslado,Tareas del hogar,Tareas del hogar,Cuidado personal,Traslado,Clases en la facultad,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Convivir con familia,Cuidado personal,Tareas del hogar,Tareas del hogar,Convivir con familia,Convivir con familia,Convivir con familia,Entretenimiento,Entretenimiento,Comprar comida,Preparar alimentos,Otras actividades
+36,Economia,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Comer y beber,Tareas del hogar,Tareas del hogar,Entretenimiento,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Cuidado personal,Cuidado personal,Comer y beber,Entretenimiento,Otras actividades,Convivir con familia,Entretenimiento,Otras actividades,Dormir,Dormir,Dormir,Dormir
+`;
+
+    // --- CONFIGURACIÓN ---
     const canvas = document.getElementById("simulation");
     const context = canvas.getContext("2d", { alpha: false });
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+    
+    let width, height;
+    function resizeCanvas() {
+        width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        createLabels(); 
+    }
+    window.addEventListener('resize', resizeCanvas);
 
+    // --- MAPA DE ACTIVIDADES ---
     const centers = {
-        "Traslado":                 { x: 0.50, y: 0.50 }, 
-        "Dormir":                   { x: 0.15, y: 0.15 },
-        "Cuidado personal":         { x: 0.32, y: 0.15 },
-        "Preparar alimentos":       { x: 0.50, y: 0.15 },
-        "Comer y beber":            { x: 0.68, y: 0.15 },
-        "Tareas del hogar":         { x: 0.85, y: 0.15 },
+        "Traslado":                 { x: 0.50, y: 0.55 },
+        "Dormir":                   { x: 0.15, y: 0.25 },
+        "Cuidado personal":         { x: 0.32, y: 0.25 },
+        "Preparar alimentos":       { x: 0.50, y: 0.25 },
+        "Comer y beber":            { x: 0.68, y: 0.25 },
+        "Tareas del hogar":         { x: 0.85, y: 0.25 },
         "Socializar":               { x: 0.10, y: 0.85 },
         "Convivir con familia":     { x: 0.26, y: 0.85 }, 
         "Entretenimiento":          { x: 0.42, y: 0.85 },
         "Ejercicio y/o deporte":    { x: 0.58, y: 0.85 },
         "Clases extracurriculares": { x: 0.74, y: 0.85 },
         "Otras actividades":        { x: 0.90, y: 0.85 },
-        "Pagar cuentas":            { x: 0.15, y: 0.32 },
-        "Comprar comida":           { x: 0.15, y: 0.50 },
-        "Religión":                 { x: 0.15, y: 0.68 },
-        "Clases en la facultad":    { x: 0.85, y: 0.32 },
-        "Trabajar":                 { x: 0.85, y: 0.50 },
+        "Pagar cuentas":            { x: 0.10, y: 0.55 },
+        "Comprar comida":           { x: 0.25, y: 0.55 },
+        "Religión":                 { x: 0.15, y: 0.70 },
+        "Clases en la facultad":    { x: 0.85, y: 0.45 },
+        "Trabajar":                 { x: 0.75, y: 0.55 },
         "Tareas y estudio":         { x: 0.85, y: 0.68 }
     };
 
     function createLabels() {
         const container = document.getElementById('labels-container');
-        container.innerHTML = '';
+        if(!container) return;
+        container.innerHTML = ''; 
         Object.keys(centers).forEach(key => {
             const div = document.createElement('div');
             div.className = 'label';
             if (key === "Traslado") div.classList.add("center-activity");
-            
             div.style.left = (centers[key].x * width) + 'px';
             div.style.top = (centers[key].y * height) + 'px';
-            
-            // Creamos estructura interna: Nombre + Porcentaje
-            // Usamos un ID sanitizado para actualizar el numero despues
             const safeId = key.replace(/\s+/g, '-').toLowerCase();
-            div.innerHTML = `
-                <div>${key}</div>
-                <div id="pct-${safeId}" class="pct-indicator">0%</div>
-            `;
+            div.innerHTML = `<div>${key}</div><div id="pct-${safeId}" class="pct-indicator">0%</div>`;
             container.appendChild(div);
         });
     }
@@ -211,7 +261,6 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
     let simulation;
     let clockInterval; 
     let time = 360; 
-
     const pastelColors = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#fab1a0", "#81ecec"];
     const colorScale = d3.scaleOrdinal(pastelColors); 
 
@@ -257,25 +306,30 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
     }
 
     function startSimulation() {
-        createLabels();
-        const csvInput = document.getElementById("csv-input").value;
-        let data = parseCSV(csvInput);
+        resizeCanvas();
+        let data = parseCSV(misDatosReales);
+        
         nodes = [];
-        data.forEach(realNode => { 
-            for(let i=0; i<1; i++){  //
+        data.forEach(realNode => {
+            // Se mantiene en 1 vuelta para ser 1 a 1. 
+            // La logica de puntos inteligentes abajo se encarga del tamaño
+            for(let i=0; i<1; i++){ 
                 nodes.push({
-                    ...realNode, id: realNode.id + "-v" + i, 
-                    x: (width/2) + (Math.random()*20 - 10), y: (height/2) + (Math.random()*20 - 10),
+                    ...realNode, 
+                    id: realNode.id + "-v" + i, 
+                    x: (width/2) + (Math.random()*20 - 10), 
+                    y: (height/2) + (Math.random()*20 - 10),
                     schedule: realNode.schedule.map(s => ({...s, until: s.until + (Math.random()*10 - 5)})) 
                 });
             }
         });
-        document.getElementById("data-modal").style.display = "none";
+
+        const isMobile = width < 768;
         
         simulation = d3.forceSimulation(nodes)
             .alphaMin(0.001).velocityDecay(0.35) 
-            .force("charge", d3.forceManyBody().strength(-2)) 
-            .force("collide", d3.forceCollide().radius(3).strength(0.6))
+            .force("charge", d3.forceManyBody().strength(-10)) 
+            .force("collide", d3.forceCollide().radius(isMobile ? 3 : 5).strength(0.8)) 
             .on("tick", render);
         startClock(60); 
     }
@@ -283,19 +337,39 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
     function render() {
         context.fillStyle = "rgba(255, 255, 255, 0.25)"; 
         context.fillRect(0, 0, width, height);
+        
+        // --- LOGICA DE PUNTOS INTELIGENTES (TAMAÑO DINAMICO) ---
+        let baseSize = 6; 
+        const count = nodes.length;
+
+        // Reglas de ajuste: Más gente = Puntos más chicos
+        if (count > 50) baseSize = 5;
+        if (count > 150) baseSize = 4;
+        if (count > 400) baseSize = 3;
+        if (count > 800) baseSize = 2;
+
+        const isMobile = width < 768;
+        const finalRadius = isMobile ? Math.max(2, baseSize - 1.5) : baseSize;
+        // -----------------------------------------------------------
+
         let hoveredNode = null;
         nodes.forEach(node => {
             node.x += (node.targetX - node.x) * 0.06;
             node.y += (node.targetY - node.y) * 0.06;
-            context.beginPath(); context.arc(node.x, node.y, 4, 0, 2 * Math.PI);
+            
+            context.beginPath(); 
+            // Usamos el tamaño dinamico finalRadius
+            context.arc(node.x, node.y, finalRadius, 0, 2 * Math.PI);
             context.fillStyle = node.color; context.fill();
+            
             if (mousePos) {
                 const dist = Math.hypot(mousePos.x - node.x, mousePos.y - node.y);
                 if (dist < 10) hoveredNode = node;
             }
         });
+        
         const tooltip = document.getElementById("tooltip");
-        if (hoveredNode) {
+        if (hoveredNode && mousePos) {
             tooltip.style.display = "block";
             tooltip.style.left = (hoveredNode.x + 15) + "px"; tooltip.style.top = (hoveredNode.y - 15) + "px";
             tooltip.innerHTML = `<strong style="color:#74b9ff">${hoveredNode.group}</strong><br>${hoveredNode.currentActivity}`;
@@ -304,15 +378,10 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
         } else { tooltip.style.display = "none"; }
     }
 
-    // --- NUEVA FUNCIÓN: Actualizar Porcentajes en Vivo ---
     function updatePercentages() {
         const counts = {};
-        // Inicializar contadores
         Object.keys(centers).forEach(key => counts[key] = 0);
-        // Fallback para errores de nombre
         counts["Otras actividades"] = 0; 
-
-        // Contar dónde está cada nodo
         nodes.forEach(node => {
             if (counts[node.currentActivity] !== undefined) {
                 counts[node.currentActivity]++;
@@ -320,20 +389,14 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
                 counts["Otras actividades"]++;
             }
         });
-
         const total = nodes.length;
-        
-        // Actualizar el DOM
         Object.keys(centers).forEach(key => {
             const safeId = key.replace(/\s+/g, '-').toLowerCase();
             const el = document.getElementById(`pct-${safeId}`);
             if (el) {
                 const count = counts[key] || 0;
-                // Calculamos porcentaje sin decimales
-                const percent = ((count / total) * 100).toFixed(0);
+                const percent = total > 0 ? ((count / total) * 100).toFixed(0) : 0;
                 el.innerText = percent + "%";
-                
-                // Efecto visual: si hay gente, ponerlo azul fuerte, si no, gris suave
                 el.style.color = count > 0 ? "#0984e3" : "#b2bec3";
             }
         });
@@ -358,10 +421,7 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
                     }
                 }
             });
-            
-            // Actualizar los porcentajes en cada tick del reloj
             updatePercentages();
-            
             simulation.alpha(0.15).restart();
         }, delay);
     }
@@ -378,7 +438,18 @@ ID,Grupo,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30
         mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     });
     canvas.addEventListener("mouseleave", () => mousePos = null);
+
+    canvas.addEventListener("touchstart", e => {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        mousePos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+        setTimeout(() => mousePos = null, 2000);
+    }, {passive: true});
+
+    window.addEventListener('load', () => {
+        setTimeout(startSimulation, 100); 
+    });
+
 </script>
 </body>
 </html>
- 
