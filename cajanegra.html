@@ -32,11 +32,25 @@
         .title-box h2 { margin: 0; font-size: 0.78rem; font-weight: 500; color: #636e72; }
         .title-box .author-tag { margin-top: 3px; font-size: 0.72rem; font-weight: 700; color: #0984e3; }
 
-        .controls-area { position: absolute; top: 15px; left: 15px; display: flex; gap: 5px; pointer-events: auto; z-index: 25; }
-        .speed-btn { background: #f1f2f6; color: #636e72; border: 1px solid #ced6e0; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
-        .speed-btn.active { background: #74b9ff; color: white; border-color: #74b9ff; }
+        .controls-area { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; z-index: 25; }
+        .btn-group { display: flex; gap: 4px; background: rgba(255,255,255,0.9); padding: 4px; border-radius: 15px; border: 1px solid #dfe6e9; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .ctrl-btn { background: #f1f2f6; color: #636e72; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 0.72rem; font-weight: bold; transition: all 0.2s; }
+        .ctrl-btn.active { background: #74b9ff; color: white; }
+        .ctrl-btn.filter-female.active { background: #e84393; }
+        .ctrl-btn.filter-male.active { background: #0984e3; }
 
         #clock { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; font-weight: 800; background: rgba(255,255,255,0.95); color: #2d3436; padding: 4px 15px; border-radius: 12px; border: 1px solid #dfe6e9; pointer-events: auto; z-index: 25; }
+
+        .timeline-wrapper {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 85%; max-width: 650px; background: rgba(255,255,255,0.95);
+            padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px); z-index: 30; pointer-events: auto;
+            display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .play-btn { background: #0984e3; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(9,132,227,0.3); }
+        .slider-container { flex-grow: 1; display: flex; align-items: center; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #0984e3; }
 
         .label {
             position: absolute; font-size: 0.65rem; font-weight: bold; color: #2d3436;
@@ -76,8 +90,10 @@
             .title-box h2 { font-size: 0.62rem; }
             .title-box .author-tag { font-size: 0.58rem; }
             .controls-area { top: 8px; left: 8px; }
-            .speed-btn { padding: 4px 8px; font-size: 0.65rem; border-radius: 10px; }
+            .ctrl-btn { padding: 3px 6px; font-size: 0.6rem; }
             #clock { top: 8px; right: 8px; font-size: 0.95rem; padding: 3px 8px; border-radius: 8px; }
+            .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 90%; }
+            .play-btn { width: 28px; height: 28px; font-size: 0.75rem; }
             .label { width: 70px; height: 40px; font-size: 0.5rem; border-radius: 8px; }
             .pct-indicator { font-size: 0.68rem; margin-top: 1px; }
             .modal-content { width: 92%; height: 85vh; padding: 15px; }
@@ -108,17 +124,36 @@
     <div id="ui-layer">
         <div class="header-container">
             <div class="title-box">
-                <h1>Uso del Tiempo de los alumnos de la Facultad de Ciencias Sociales (UACAM)</h1>
-                <h2>Actividades diarias</h2>
+                <h1>Cronografía de Uso del Tiempo</h1>
+                <h2>Análisis Sociológico de Pobreza de Tiempo</h2>
                 <div class="author-tag">Autor: Dr. Adrián Eduardo Pech Quijano</div>
             </div>
         </div>
+        
         <div class="controls-area">
-            <button class="speed-btn active" onclick="setSpeed(1, this)">1x</button>
-            <button class="speed-btn" onclick="setSpeed(2, this)">2x</button>
-            <button class="speed-btn" onclick="setSpeed(4, this)">4x</button>
+            <!-- Filtro de Género -->
+            <div class="btn-group">
+                <button class="ctrl-btn active" onclick="setGenderFilter('Todos', this)">Todos</button>
+                <button class="ctrl-btn filter-female" onclick="setGenderFilter('Mujer', this)">Mujeres</button>
+                <button class="ctrl-btn filter-male" onclick="setGenderFilter('Hombre', this)">Hombres</button>
+            </div>
+            <!-- Selección de Velocidad -->
+            <div class="btn-group">
+                <button class="ctrl-btn speed-btn active" onclick="setSpeed(1, this)">1x</button>
+                <button class="ctrl-btn speed-btn" onclick="setSpeed(2, this)">2x</button>
+                <button class="ctrl-btn speed-btn" onclick="setSpeed(4, this)">4x</button>
+            </div>
         </div>
+
         <div id="clock">00:00</div>
+
+        <!-- Barra de Tiempo Interactiva -->
+        <div class="timeline-wrapper">
+            <button class="play-btn" id="play-btn" onclick="togglePlay()">⏸</button>
+            <div class="slider-container">
+                <input type="range" id="time-slider" min="0" value="0" step="1" oninput="onSliderChange(this.value)">
+            </div>
+        </div>
     </div>
 </div>
 
@@ -140,13 +175,16 @@
     function mapearActividad(act) {
         if (!act) return "Otras actividades";
         act = act.trim();
-        
         const hubExistente = hubs.find(h => h.id === act);
-        if (hubExistente) {
-            return act;
-        }
-        
-        return "Otras actividades";
+        return hubExistente ? act : "Otras actividades";
+    }
+
+    function normalizarGenero(genderStr) {
+        if (!genderStr) return "Otro";
+        let g = genderStr.toLowerCase().trim();
+        if (g.includes("mujer") || g.includes("femenino") || g === "f") return "Mujer";
+        if (g.includes("hombre") || g.includes("masculino") || g === "m") return "Hombre";
+        return "Otro";
     }
 
     let width = window.innerWidth;
@@ -160,12 +198,14 @@
     let nodes = [];
     let currentSlotIndex = 0;
     let speed = 1;
+    let isPlaying = true;
+    let timerInterval = null;
+    let currentGenderFilter = "Todos";
     let labelsElements = {};
 
     function calcularPosicionesHubs() {
         const cx = width / 2;
         const isMobile = width < 600;
-        
         const cy = isMobile ? height * 0.56 : height * 0.54;
         
         const radiusFactor = isMobile ? 0.28 : 0.32;
@@ -211,7 +251,6 @@
         const csvText = document.getElementById("csv-input").value;
         const data = d3.csvParse(csvText);
         
-        // Filtra columnas buscando patrones de hora (ej: 00:00, 00:30) dentro de la pregunta de Google Forms
         timeSlots = data.columns
             .filter(col => /\d{2}:\d{2}/.test(col))
             .map(col => {
@@ -222,12 +261,13 @@
                 };
             });
         
+        document.getElementById("time-slider").max = timeSlots.length - 1;
+
         nodes = data.map((d, i) => {
-            // Encuentra la columna de género automáticamente si cambia el texto exacto
             const genderKey = Object.keys(d).find(k => k.toLowerCase().includes("género") || k.toLowerCase().includes("genero")) || "Género";
             return {
                 id: i,
-                gender: d[genderKey],
+                gender: normalizarGenero(d[genderKey]),
                 schedule: d,
                 x: width / 2 + (Math.random() - 0.5) * 50,
                 y: height / 2 + (Math.random() - 0.5) * 50,
@@ -242,25 +282,31 @@
         crearEtiquetasUI();
         actualizarEtiquetasUI();
         
-        setInterval(avanzarTiempo, 1200 / speed);
+        reiniciarTimer();
         requestAnimationFrame(render);
     }
 
-    function avanzarTiempo() {
+    function actualizarEstadoTiempo() {
         if (timeSlots.length === 0) return;
-        
+
         let currentSlot = timeSlots[currentSlotIndex];
         document.getElementById("clock").innerText = currentSlot.displayTime;
+        document.getElementById("time-slider").value = currentSlotIndex;
 
         let conteo = {};
         hubs.forEach(h => conteo[h.id] = 0);
         let isMobile = width < 600;
 
+        let filteredNodes = nodes.filter(n => currentGenderFilter === "Todos" || n.gender === currentGenderFilter);
+
         nodes.forEach(node => {
             let actRaw = node.schedule[currentSlot.columnHeader];
             let hubId = mapearActividad(actRaw);
             node.currentHub = hubId;
-            conteo[hubId] = (conteo[hubId] || 0) + 1;
+
+            if (currentGenderFilter === "Todos" || node.gender === currentGenderFilter) {
+                conteo[hubId] = (conteo[hubId] || 0) + 1;
+            }
 
             let hub = hubs.find(h => h.id === hubId);
             if (hub) {
@@ -272,37 +318,70 @@
             }
         });
 
+        const totalPoblacion = filteredNodes.length || 1;
         hubs.forEach(h => {
-            let pct = Math.round(((conteo[h.id] || 0) / nodes.length) * 100);
+            let pct = Math.round(((conteo[h.id] || 0) / totalPoblacion) * 100);
             let pctEl = document.getElementById(`pct-${h.id}`);
             if (pctEl) pctEl.innerText = `${pct}%`;
         });
+    }
 
+    function avanzarTiempo() {
+        actualizarEstadoTiempo();
         currentSlotIndex = (currentSlotIndex + 1) % timeSlots.length;
+    }
+
+    function reiniciarTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        if (isPlaying) {
+            timerInterval = setInterval(avanzarTiempo, 1200 / speed);
+        }
+    }
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        document.getElementById("play-btn").innerText = isPlaying ? "⏸" : "▶";
+        reiniciarTimer();
+    }
+
+    function onSliderChange(val) {
+        currentSlotIndex = parseInt(val);
+        actualizarEstadoTiempo();
+    }
+
+    function setGenderFilter(filter, btn) {
+        currentGenderFilter = filter;
+        document.querySelectorAll('.controls-area .btn-group:first-child .ctrl-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        actualizarEstadoTiempo();
     }
 
     function setSpeed(val, btn) {
         speed = val;
         document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        reiniciarTimer();
     }
 
     function render() {
         ctx.clearRect(0, 0, width, height);
-
         let particleRadius = width < 600 ? 3 : 4;
 
         nodes.forEach(node => {
             node.x += (node.targetX - node.x) * 0.1;
             node.y += (node.targetY - node.y) * 0.1;
 
+            let isVisible = (currentGenderFilter === "Todos" || node.gender === currentGenderFilter);
             let hub = hubs.find(h => h.id === node.currentHub);
+
             ctx.beginPath();
             ctx.arc(node.x, node.y, particleRadius, 0, 2 * Math.PI);
+            ctx.globalAlpha = isVisible ? 1.0 : 0.08; // Atenúa partículas del género no seleccionado
             ctx.fillStyle = hub ? hub.color : "#b2bec3";
             ctx.fill();
         });
 
+        ctx.globalAlpha = 1.0;
         requestAnimationFrame(render);
     }
 
