@@ -51,7 +51,7 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        .gender-select {
+        .custom-select {
             background: #f1f2f6;
             color: #2d3436;
             border: 1px solid #ced6e0;
@@ -62,10 +62,6 @@
             outline: none;
             cursor: pointer;
         }
-
-        .btn-group { display: flex; flex-wrap: wrap; gap: 4px; background: rgba(255,255,255,0.95); padding: 4px; border-radius: 12px; border: 1px solid #dfe6e9; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .ctrl-btn { background: #f1f2f6; color: #636e72; border: none; padding: 5px 9px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; transition: all 0.2s; }
-        .ctrl-btn.active { background: #74b9ff; color: white; }
 
         #clock { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; font-weight: 800; background: rgba(255,255,255,0.95); color: #2d3436; padding: 4px 15px; border-radius: 12px; border: 1px solid #dfe6e9; pointer-events: auto; z-index: 25; }
 
@@ -120,8 +116,7 @@
             .controls-area { top: 8px; left: 8px; }
             .filter-card { padding: 4px 8px; }
             .filter-label { font-size: 0.55rem; }
-            .gender-select { font-size: 0.62rem; padding: 3px 5px; }
-            .ctrl-btn { padding: 3px 6px; font-size: 0.58rem; }
+            .custom-select { font-size: 0.62rem; padding: 3px 5px; }
             #clock { top: 8px; right: 8px; font-size: 0.95rem; padding: 3px 8px; border-radius: 8px; }
             .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 90%; }
             .play-btn { width: 28px; height: 28px; font-size: 0.75rem; }
@@ -164,10 +159,10 @@
         </div>
         
         <div class="controls-area">
-            <!-- Filtro Desplegable con Etiqueta -->
+            <!-- Filtro de Género -->
             <div class="filter-card">
                 <label for="gender-select" class="filter-label">Género con el que te identificas:</label>
-                <select id="gender-select" class="gender-select" onchange="setGenderFilter(this.value)">
+                <select id="gender-select" class="custom-select" onchange="setGenderFilter(this.value)">
                     <option value="Todos">Todos</option>
                     <option value="Mujer">Mujeres</option>
                     <option value="Hombre">Hombres</option>
@@ -176,11 +171,14 @@
                 </select>
             </div>
 
-            <!-- Selección de Velocidad -->
-            <div class="btn-group">
-                <button class="ctrl-btn speed-btn active" onclick="setSpeed(1, this)">1x</button>
-                <button class="ctrl-btn speed-btn" onclick="setSpeed(2, this)">2x</button>
-                <button class="ctrl-btn speed-btn" onclick="setSpeed(4, this)">4x</button>
+            <!-- Filtro de Velocidad -->
+            <div class="filter-card">
+                <label for="speed-select" class="filter-label">Velocidad de reproducción:</label>
+                <select id="speed-select" class="custom-select" onchange="setSpeed(this.value)">
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="4">4x</option>
+                </select>
             </div>
         </div>
 
@@ -395,10 +393,8 @@
         actualizarEstadoTiempo();
     }
 
-    function setSpeed(val, btn) {
-        speed = val;
-        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function setSpeed(val) {
+        speed = parseFloat(val);
         reiniciarTimer();
     }
 
