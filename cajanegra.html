@@ -17,9 +17,10 @@
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
         
         .header-container { width: 100%; display: flex; justify-content: center; padding-top: 10px; pointer-events: auto; }
-        .title-box { text-align: center; background: rgba(255,255,255,0.85); padding: 5px 15px; border-radius: 15px; backdrop-filter: blur(2px); }
+        .title-box { text-align: center; background: rgba(255,255,255,0.85); padding: 6px 16px; border-radius: 15px; backdrop-filter: blur(2px); }
         .title-box h1 { margin: 0; font-size: 1.3rem; font-weight: 800; color: #2d3436; text-transform: uppercase; }
         .title-box h2 { margin: 0; font-size: 0.8rem; font-weight: 500; color: #636e72; }
+        .title-box .author-tag { margin-top: 3px; font-size: 0.72rem; font-weight: 700; color: #0984e3; }
 
         .controls-area { position: absolute; top: 15px; left: 15px; display: flex; gap: 5px; pointer-events: auto; }
         .speed-btn { background: #f1f2f6; color: #636e72; border: 1px solid #ced6e0; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
@@ -59,11 +60,11 @@
         }
         button.start-btn:hover { background: #0984e3; transform: scale(1.05); }
 
-        /* Ajustes específicos para pantallas pequeñas / móviles */
         @media (max-width: 600px) {
             .header-container { padding-top: 50px; }
             .title-box h1 { font-size: 0.85rem; }
             .title-box h2 { font-size: 0.65rem; }
+            .title-box .author-tag { font-size: 0.6rem; }
             .controls-area { top: 8px; left: 8px; }
             .speed-btn { padding: 4px 8px; font-size: 0.65rem; border-radius: 10px; }
             #clock { top: 8px; right: 8px; font-size: 1rem; padding: 3px 10px; border-radius: 8px; }
@@ -78,12 +79,15 @@
 
 <div id="data-modal">
     <div class="modal-content">
-        <h2 style="margin: 0 0 10px 0; color:#2d3436">📊 Carga de Datos de Uso del Tiempo</h2>
-        <p style="color: #636e72; margin: 0 0 10px 0; font-size: 0.9rem;">
+        <h2 style="margin: 0 0 5px 0; color:#2d3436">📊 Carga de Datos de Uso del Tiempo</h2>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #0984e3; margin-bottom: 8px;">
+            Autor: Dr. Adrián Eduardo Pech Quijano
+        </div>
+        <p style="color: #636e72; margin: 0 0 10px 0; font-size: 0.85rem;">
             Pega tu CSV descargado del nuevo Google Form (48 columnas de 00:00 a 23:30).
         </p>
         <textarea id="csv-input">ID,Grupo,Género,00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30
-1,Economía,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Socializar,Socializar,Convivir con familia,Convivir con familia,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir
+1,Economía,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Socializar,Socializar,Entretenimiento,Entretenimiento,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir
 2,Economía,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas y estudio,Tareas y estudio,Dormir,Dormir</textarea>
         <button class="start-btn" onclick="iniciarSimulacion()">Iniciar Visualización</button>
     </div>
@@ -96,6 +100,7 @@
             <div class="title-box">
                 <h1>Cronografía de Uso del Tiempo</h1>
                 <h2>Análisis Sociológico de Pobreza de Tiempo</h2>
+                <div class="author-tag">Autor: Dr. Adrián Eduardo Pech Quijano</div>
             </div>
         </div>
         <div class="controls-area">
@@ -108,14 +113,18 @@
 </div>
 
 <script>
+    // HUBS EXACTOS PARA LAS 11 ACTIVIDADES DEL FORMULARIO
     const hubs = [
-        { id: "Dormir", label: "Sueño", color: "#a29bfe" },
         { id: "Clases en la facultad", label: "Clases", color: "#0984e3" },
         { id: "Tareas y estudio", label: "Estudio", color: "#74b9ff" },
         { id: "Trabajo remunerado", label: "Trabajo", color: "#e17055" },
         { id: "Traslado", label: "Traslado", color: "#fdcb6e" },
         { id: "Tareas del hogar/Cuidados", label: "Cuidados/Hogar", color: "#e84393" },
-        { id: "Tiempo Libre", label: "Tiempo Libre", color: "#55efc4" },
+        { id: "Dormir", label: "Sueño", color: "#a29bfe" },
+        { id: "Socializar", label: "Socializar", color: "#00b894" },
+        { id: "Entretenimiento", label: "Entretenimiento", color: "#55efc4" },
+        { id: "Ejercicio y/o deporte", label: "Ejercicio", color: "#00cec9" },
+        { id: "Convivir con familia", label: "Familia", color: "#ff7675" },
         { id: "Otras actividades", label: "Otras Activ.", color: "#b2bec3" }
     ];
 
@@ -123,15 +132,9 @@
         if (!act) return "Otras actividades";
         act = act.trim();
         
-        if (act === "Dormir") return "Dormir";
-        if (act === "Clases en la facultad") return "Clases en la facultad";
-        if (act === "Tareas y estudio") return "Tareas y estudio";
-        if (act === "Trabajo remunerado") return "Trabajo remunerado";
-        if (act === "Traslado") return "Traslado";
-        if (act === "Tareas del hogar/Cuidados") return "Tareas del hogar/Cuidados";
-        
-        if (["Socializar", "Entretenimiento", "Ejercicio y/o deporte", "Convivir con familia"].includes(act)) {
-            return "Tiempo Libre";
+        const hubExistente = hubs.find(h => h.id === act);
+        if (hubExistente) {
+            return act;
         }
         
         return "Otras actividades";
@@ -155,8 +158,7 @@
         const cy = height / 2;
         const isMobile = width < 600;
         
-        // Radio ajustado para evitar salirse de los bordes en pantallas estrechas
-        const radiusFactor = isMobile ? 0.31 : 0.35;
+        const radiusFactor = isMobile ? 0.33 : 0.36;
         const rx = Math.min(width, height) * radiusFactor;
         const ry = Math.min(width, height) * radiusFactor;
 
@@ -235,7 +237,7 @@
             let hub = hubs.find(h => h.id === hubId);
             if (hub) {
                 let angle = Math.random() * 2 * Math.PI;
-                let maxSpread = isMobile ? 20 : 35;
+                let maxSpread = isMobile ? 18 : 30;
                 let r = Math.random() * maxSpread;
                 node.targetX = hub.x + r * Math.cos(angle);
                 node.targetY = hub.y + r * Math.sin(angle);
