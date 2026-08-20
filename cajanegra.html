@@ -33,11 +33,13 @@
         .title-box .author-tag { margin-top: 3px; font-size: 0.72rem; font-weight: 700; color: #0984e3; }
 
         .controls-area { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; z-index: 25; }
-        .btn-group { display: flex; gap: 4px; background: rgba(255,255,255,0.9); padding: 4px; border-radius: 15px; border: 1px solid #dfe6e9; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .ctrl-btn { background: #f1f2f6; color: #636e72; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 0.72rem; font-weight: bold; transition: all 0.2s; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 4px; background: rgba(255,255,255,0.95); padding: 4px; border-radius: 15px; border: 1px solid #dfe6e9; box-shadow: 0 2px 5px rgba(0,0,0,0.05); max-width: 320px; }
+        .ctrl-btn { background: #f1f2f6; color: #636e72; border: none; padding: 5px 9px; border-radius: 10px; cursor: pointer; font-size: 0.7rem; font-weight: bold; transition: all 0.2s; }
         .ctrl-btn.active { background: #74b9ff; color: white; }
         .ctrl-btn.filter-female.active { background: #e84393; }
         .ctrl-btn.filter-male.active { background: #0984e3; }
+        .ctrl-btn.filter-other.active { background: #6c5ce7; }
+        .ctrl-btn.filter-private.active { background: #636e72; }
 
         #clock { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; font-weight: 800; background: rgba(255,255,255,0.95); color: #2d3436; padding: 4px 15px; border-radius: 12px; border: 1px solid #dfe6e9; pointer-events: auto; z-index: 25; }
 
@@ -90,7 +92,8 @@
             .title-box h2 { font-size: 0.62rem; }
             .title-box .author-tag { font-size: 0.58rem; }
             .controls-area { top: 8px; left: 8px; }
-            .ctrl-btn { padding: 3px 6px; font-size: 0.6rem; }
+            .btn-group { max-width: 200px; }
+            .ctrl-btn { padding: 3px 6px; font-size: 0.58rem; }
             #clock { top: 8px; right: 8px; font-size: 0.95rem; padding: 3px 8px; border-radius: 8px; }
             .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 90%; }
             .play-btn { width: 28px; height: 28px; font-size: 0.75rem; }
@@ -114,7 +117,9 @@
         </p>
         <textarea id="csv-input">Marca temporal,Dirección de correo electrónico,Género con el que te identificas:,Semestre que cursas:,Licenciatura que cursas,¿Qué hacías de 00:00 a 00:30?,¿Qué hacías de 00:30 a 01:00?,¿Qué hacías de 01:00 a 01:30?,¿Qué hacías de 01:30 a 02:00?,¿Qué hacías de 02:00 a 02:30?,¿Qué hacías de 02:30 a 03:00?,¿Qué hacías de 03:00 a 03:30?,¿Qué hacías de 03:30 a 04:00?,¿Qué hacías de 04:00 a 04:30?,¿Qué hacías de 04:30 a 05:00?,¿Qué hacías de 05:00 a 05:30?,¿Qué hacías de 05:30 a 06:00?,¿Qué hacías de 06:00 a 06:30?,¿Qué hacías de 06:30 a 07:00?,¿Qué hacías de 07:00 a 07:30?,¿Qué hacías de 07:30 a 08:00?,¿Qué hacías de 08:00 a 08:30?,¿Qué hacías de 08:30 a 09:00?,¿Qué hacías de 09:00 a 09:30?,¿Qué hacías de 09:30 a 10:00?,¿Qué hacías de 10:00 a 10:30?,¿Qué hacías de 10:30 a 11:00?,¿Qué hacías de 11:00 a 11:30?,¿Qué hacías de 11:30 a 12:00?,¿Qué hacías de 12:00 a 12:30?,¿Qué hacías de 12:30 a 13:00?,¿Qué hacías de 13:00 a 13:30?,¿Qué hacías de 13:30 a 14:00?,¿Qué hacías de 14:00 a 14:30?,¿Qué hacías de 14:30 a 15:00?,¿Qué hacías de 15:00 a 15:30?,¿Qué hacías de 15:30 a 16:00?,¿Qué hacías de 16:00 a 16:30?,¿Qué hacías de 16:30 a 17:00?,¿Qué hacías de 17:00 a 17:30?,¿Qué hacías de 17:30 a 18:00?,¿Qué hacías de 18:00 a 18:30?,¿Qué hacías de 18:30 a 19:00?,¿Qué hacías de 19:00 a 19:30?,¿Qué hacías de 19:30 a 20:00?,¿Qué hacías de 20:00 a 20:30?,¿Qué hacías de 20:30 a 21:00?,¿Qué hacías de 21:00 a 21:30?,¿Qué hacías de 21:30 a 22:00?,¿Qué hacías de 22:00 a 22:30?,¿Qué hacías de 22:30 a 23:00?,¿Qué hacías de 23:00 a 23:30?,¿Qué hacías de 23:30 a 00:00?
 2026-03-01,estudiante1@correo.com,Mujer,4,Economía,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Socializar,Socializar,Entretenimiento,Entretenimiento,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir,Dormir
-2026-03-01,estudiante2@correo.com,Hombre,4,Economía,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir</textarea>
+2026-03-01,estudiante2@correo.com,Hombre,4,Economía,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir
+2026-03-01,estudiante3@correo.com,Otro,4,Economía,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Entretenimiento,Entretenimiento,Entretenimiento,Convivir con familia,Convivir con familia,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir
+2026-03-01,estudiante4@correo.com,Prefiero no decirlo,4,Economía,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Traslado,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir</textarea>
         <button class="start-btn" onclick="iniciarSimulacion()">Iniciar Visualización</button>
     </div>
 </div>
@@ -131,11 +136,13 @@
         </div>
         
         <div class="controls-area">
-            <!-- Filtro de Género -->
+            <!-- Filtro Desagregado por Género / Identidad -->
             <div class="btn-group">
                 <button class="ctrl-btn active" onclick="setGenderFilter('Todos', this)">Todos</button>
                 <button class="ctrl-btn filter-female" onclick="setGenderFilter('Mujer', this)">Mujeres</button>
                 <button class="ctrl-btn filter-male" onclick="setGenderFilter('Hombre', this)">Hombres</button>
+                <button class="ctrl-btn filter-other" onclick="setGenderFilter('Otro', this)">Otro</button>
+                <button class="ctrl-btn filter-private" onclick="setGenderFilter('Prefiero no decirlo', this)">Prefiero no decirlo</button>
             </div>
             <!-- Selección de Velocidad -->
             <div class="btn-group">
@@ -180,10 +187,12 @@
     }
 
     function normalizarGenero(genderStr) {
-        if (!genderStr) return "Otro";
+        if (!genderStr) return "Prefiero no decirlo";
         let g = genderStr.toLowerCase().trim();
         if (g.includes("mujer") || g.includes("femenino") || g === "f") return "Mujer";
         if (g.includes("hombre") || g.includes("masculino") || g === "m") return "Hombre";
+        if (g.includes("prefiero no") || g.includes("no decir") || g.includes("reservado")) return "Prefiero no decirlo";
+        if (g.includes("otro") || g.includes("non-binary") || g.includes("no binario")) return "Otro";
         return "Otro";
     }
 
@@ -376,7 +385,7 @@
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, particleRadius, 0, 2 * Math.PI);
-            ctx.globalAlpha = isVisible ? 1.0 : 0.08; // Atenúa partículas del género no seleccionado
+            ctx.globalAlpha = isVisible ? 1.0 : 0.08;
             ctx.fillStyle = hub ? hub.color : "#b2bec3";
             ctx.fill();
         });
