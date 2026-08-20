@@ -29,10 +29,11 @@
 
         .label {
             position: absolute; font-size: 0.65rem; font-weight: bold; color: #2d3436;
-            border: 1px solid rgba(0,0,0,0.1); width: 90px; height: 50px; border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.1); width: 95px; height: 50px; border-radius: 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; 
             pointer-events: none; background: rgba(255,255,255,0.85); padding: 2px;
             transform: translate(-50%, -50%); z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
         .pct-indicator { font-size: 0.85rem; color: #0984e3; margin-top: 2px; font-weight: 800; }
 
@@ -44,12 +45,12 @@
         .modal-content {
             background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 850px;
             text-align: center; border: 1px solid #eee; height: 75vh; display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box;
         }
         textarea {
             width: 100%; flex-grow: 1; background: #f8f9fa; color: #2d3436; border: 1px solid #dfe6e9;
             padding: 10px; font-family: 'Consolas', monospace; margin-top: 10px; font-size: 0.75rem; border-radius: 5px;
-            white-space: pre; overflow: auto;
+            white-space: pre; overflow: auto; box-sizing: border-box;
         }
         button.start-btn {
             background: #74b9ff; color: white; border: none; padding: 12px 40px;
@@ -57,6 +58,20 @@
             font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 10px rgba(116, 185, 255, 0.4);
         }
         button.start-btn:hover { background: #0984e3; transform: scale(1.05); }
+
+        /* Ajustes específicos para pantallas pequeñas / móviles */
+        @media (max-width: 600px) {
+            .header-container { padding-top: 50px; }
+            .title-box h1 { font-size: 0.85rem; }
+            .title-box h2 { font-size: 0.65rem; }
+            .controls-area { top: 8px; left: 8px; }
+            .speed-btn { padding: 4px 8px; font-size: 0.65rem; border-radius: 10px; }
+            #clock { top: 8px; right: 8px; font-size: 1rem; padding: 3px 10px; border-radius: 8px; }
+            .label { width: 72px; height: 42px; font-size: 0.52rem; border-radius: 8px; }
+            .pct-indicator { font-size: 0.7rem; margin-top: 1px; }
+            .modal-content { width: 92%; height: 85vh; padding: 15px; }
+            button.start-btn { padding: 10px 25px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -65,12 +80,11 @@
     <div class="modal-content">
         <h2 style="margin: 0 0 10px 0; color:#2d3436">📊 Carga de Datos de Uso del Tiempo</h2>
         <p style="color: #636e72; margin: 0 0 10px 0; font-size: 0.9rem;">
-            Pega tu CSV con las 48 columnas de 30 minutos (de 00:00 a 23:30) para iniciar la simulación.
+            Pega tu CSV descargado del nuevo Google Form (48 columnas de 00:00 a 23:30).
         </p>
-        <textarea id="csv-input">ID,Grupo ,Género,00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30
-1,Economía,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Preparar alimentos,Tareas del hogar,Tareas del hogar,Tareas del hogar,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Preparar alimentos,Comer y beber,Convivir con familia,Convivir con familia,Preparar alimentos,Comer y beber,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir
-2,Economia,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Cuidado personal,Traslado,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Comer y beber,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Socializar,Traslado,Traslado,Comer y beber,Convivir con familia,Entretenimiento,Tareas del hogar,Entretenimiento,Convivir con familia,Entretenimiento,Entretenimiento,Cuidado personal,Tareas y estudio,Tareas y estudio,Tareas y estudio,Entretenimiento,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir
-3,Economía,Hombre,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Tareas y estudio,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Trabajar,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar,Tareas del hogar,Tareas y estudio</textarea>
+        <textarea id="csv-input">ID,Grupo,Género,00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30
+1,Economía,Mujer,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Traslado,Ejercicio y/o deporte,Ejercicio y/o deporte,Tareas y estudio,Tareas y estudio,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Traslado,Convivir con familia,Convivir con familia,Tareas y estudio,Tareas y estudio,Socializar,Socializar,Convivir con familia,Convivir con familia,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Otras actividades,Dormir,Dormir
+2,Economía,Hombre,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Dormir,Traslado,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Clases en la facultad,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Trabajo remunerado,Convivir con familia,Convivir con familia,Convivir con familia,Tareas del hogar/Cuidados,Tareas del hogar/Cuidados,Tareas y estudio,Tareas y estudio,Dormir,Dormir</textarea>
         <button class="start-btn" onclick="iniciarSimulacion()">Iniciar Visualización</button>
     </div>
 </div>
@@ -81,7 +95,7 @@
         <div class="header-container">
             <div class="title-box">
                 <h1>Cronografía de Uso del Tiempo</h1>
-                <h2>Facultad de Ciencias Sociales</h2>
+                <h2>Análisis Sociológico de Pobreza de Tiempo</h2>
             </div>
         </div>
         <div class="controls-area">
@@ -94,30 +108,33 @@
 </div>
 
 <script>
-    // 1. DEFINICIÓN DE HUBS Y NODOS DE ACTIVIDAD
     const hubs = [
-        { id: "Dormir", label: "Dormir", color: "#a29bfe" },
+        { id: "Dormir", label: "Sueño", color: "#a29bfe" },
         { id: "Clases en la facultad", label: "Clases", color: "#0984e3" },
         { id: "Tareas y estudio", label: "Estudio", color: "#74b9ff" },
-        { id: "Trabajar", label: "Trabajo", color: "#e17055" },
+        { id: "Trabajo remunerado", label: "Trabajo", color: "#e17055" },
         { id: "Traslado", label: "Traslado", color: "#fdcb6e" },
-        { id: "Cuidados y Hogar", label: "Cuidados/Hogar", color: "#e84393" },
-        { id: "Alimentación y Personal", label: "Alimentación/Personal", color: "#00b894" },
-        { id: "Tiempo Libre", label: "Tiempo Libre", color: "#55efc4" }
+        { id: "Tareas del hogar/Cuidados", label: "Cuidados/Hogar", color: "#e84393" },
+        { id: "Tiempo Libre", label: "Tiempo Libre", color: "#55efc4" },
+        { id: "Otras actividades", label: "Otras Activ.", color: "#b2bec3" }
     ];
 
-    // Mapeo unificado para estandarizar las opciones del formulario
     function mapearActividad(act) {
-        if (!act) return "Tiempo Libre";
+        if (!act) return "Otras actividades";
         act = act.trim();
+        
         if (act === "Dormir") return "Dormir";
         if (act === "Clases en la facultad") return "Clases en la facultad";
         if (act === "Tareas y estudio") return "Tareas y estudio";
-        if (act === "Trabajar" || act === "Trabajo remunerado") return "Trabajar";
+        if (act === "Trabajo remunerado") return "Trabajo remunerado";
         if (act === "Traslado") return "Traslado";
-        if (act.includes("Tareas del hogar") || act.includes("Cuidados") || act.includes("Preparar alimentos")) return "Cuidados y Hogar";
-        if (act.includes("Comer") || act.includes("Cuidado personal")) return "Alimentación y Personal";
-        return "Tiempo Libre";
+        if (act === "Tareas del hogar/Cuidados") return "Tareas del hogar/Cuidados";
+        
+        if (["Socializar", "Entretenimiento", "Ejercicio y/o deporte", "Convivir con familia"].includes(act)) {
+            return "Tiempo Libre";
+        }
+        
+        return "Otras actividades";
     }
 
     let width = window.innerWidth;
@@ -128,18 +145,20 @@
     canvas.height = height;
 
     let timeSlots = [];
-    let students = [];
     let nodes = [];
     let currentSlotIndex = 0;
     let speed = 1;
     let labelsElements = {};
 
-    // Asignar posiciones circulares a los Hubs
     function calcularPosicionesHubs() {
         const cx = width / 2;
         const cy = height / 2;
-        const rx = Math.min(width, height) * 0.35;
-        const ry = Math.min(width, height) * 0.35;
+        const isMobile = width < 600;
+        
+        // Radio ajustado para evitar salirse de los bordes en pantallas estrechas
+        const radiusFactor = isMobile ? 0.31 : 0.35;
+        const rx = Math.min(width, height) * radiusFactor;
+        const ry = Math.min(width, height) * radiusFactor;
 
         hubs.forEach((hub, i) => {
             const angle = (i / hubs.length) * 2 * Math.PI - Math.PI / 2;
@@ -173,10 +192,8 @@
         const csvText = document.getElementById("csv-input").value;
         const data = d3.csvParse(csvText);
         
-        // Extraer columnas de tiempo
         timeSlots = data.columns.filter(c => c.includes(":"));
         
-        // Crear nodos de estudiantes
         nodes = data.map((d, i) => {
             return {
                 id: d.ID || i,
@@ -195,7 +212,6 @@
         crearEtiquetasUI();
         actualizarEtiquetasUI();
         
-        // Iniciar loop de animación
         setInterval(avanzarTiempo, 1200 / speed);
         requestAnimationFrame(render);
     }
@@ -208,6 +224,7 @@
 
         let conteo = {};
         hubs.forEach(h => conteo[h.id] = 0);
+        let isMobile = width < 600;
 
         nodes.forEach(node => {
             let actRaw = node.schedule[currentTime];
@@ -217,15 +234,14 @@
 
             let hub = hubs.find(h => h.id === hubId);
             if (hub) {
-                // Dispersión suave alrededor del hub
                 let angle = Math.random() * 2 * Math.PI;
-                let r = Math.random() * 35;
+                let maxSpread = isMobile ? 20 : 35;
+                let r = Math.random() * maxSpread;
                 node.targetX = hub.x + r * Math.cos(angle);
                 node.targetY = hub.y + r * Math.sin(angle);
             }
         });
 
-        // Actualizar porcentajes
         hubs.forEach(h => {
             let pct = Math.round(((conteo[h.id] || 0) / nodes.length) * 100);
             let pctEl = document.getElementById(`pct-${h.id}`);
@@ -244,15 +260,15 @@
     function render() {
         ctx.clearRect(0, 0, width, height);
 
-        // Renderizar conexiones/puntos
+        let particleRadius = width < 600 ? 3 : 4;
+
         nodes.forEach(node => {
-            // Suavizado de movimiento (lerp)
             node.x += (node.targetX - node.x) * 0.1;
             node.y += (node.targetY - node.y) * 0.1;
 
             let hub = hubs.find(h => h.id === node.currentHub);
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 4, 0, 2 * Math.PI);
+            ctx.arc(node.x, node.y, particleRadius, 0, 2 * Math.PI);
             ctx.fillStyle = hub ? hub.color : "#b2bec3";
             ctx.fill();
         });
