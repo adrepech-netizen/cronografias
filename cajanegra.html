@@ -88,16 +88,16 @@
         #clock { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; font-weight: 800; background: rgba(255,255,255,0.95); color: #2d3436; padding: 4px 15px; border-radius: 12px; border: 1px solid #dfe6e9; pointer-events: auto; z-index: 25; }
 
         .timeline-wrapper {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 85%; max-width: 650px; background: rgba(255,255,255,0.95);
-            padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            width: 55%; max-width: 340px; background: rgba(255,255,255,0.95);
+            padding: 4px 10px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             backdrop-filter: blur(5px); z-index: 30; pointer-events: auto;
-            display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,0,0,0.05);
+            display: flex; align-items: center; gap: 8px; border: 1px solid rgba(0,0,0,0.05);
             box-sizing: border-box;
         }
-        .play-btn { background: #0984e3; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(9,132,227,0.3); }
+        .play-btn { background: #0984e3; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 1px 4px rgba(9,132,227,0.3); padding: 0; }
         .slider-container { flex-grow: 1; display: flex; align-items: center; }
-        input[type=range] { width: 100%; cursor: pointer; accent-color: #0984e3; }
+        input[type=range] { width: 100%; height: 4px; cursor: pointer; accent-color: #0984e3; margin: 0; }
 
         .label {
             position: absolute; font-size: 0.65rem; font-weight: bold; color: #2d3436;
@@ -181,8 +181,8 @@
             .filter-label { font-size: 0.5rem; letter-spacing: 0; }
             .custom-select { font-size: 0.62rem; padding: 3px 4px; }
 
-            .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 92%; }
-            .play-btn { width: 28px; height: 28px; font-size: 0.75rem; }
+            .timeline-wrapper { bottom: 8px; padding: 3px 8px; width: 65%; max-width: 240px; gap: 6px; }
+            .play-btn { width: 20px; height: 20px; font-size: 0.6rem; }
             
             .label { width: 64px; height: 34px; font-size: 0.48rem; border-radius: 7px; padding: 1px; }
             .pct-indicator { font-size: 0.62rem; margin-top: 1px; }
@@ -200,7 +200,8 @@
             .controls-area { top: 42px; flex-direction: row; width: auto; max-width: 60%; }
             .filter-card { flex-direction: row; padding: 2px 6px; gap: 4px; }
             .filter-label { display: none; }
-            .timeline-wrapper { bottom: 6px; padding: 4px 10px; }
+            .timeline-wrapper { bottom: 4px; padding: 2px 8px; width: 45%; max-width: 220px; }
+            .play-btn { width: 18px; height: 18px; font-size: 0.55rem; }
             .label { width: 62px; height: 30px; font-size: 0.46rem; }
             .pct-indicator { font-size: 0.58rem; margin-top: 0; }
         }
@@ -347,21 +348,21 @@
             ry = (height * 0.34);
         } else if (isMobile) {
             const topSafe = 118;
-            const bottomSafe = 72;
+            const bottomSafe = 54;
             const usableHeight = Math.max(200, height - topSafe - bottomSafe);
             cy = topSafe + usableHeight / 2;
             rx = (width / 2) - 38;
             ry = (usableHeight / 2) - 24;
         } else if (isTablet) {
             const topSafe = 130;
-            const bottomSafe = 80;
+            const bottomSafe = 60;
             const usableHeight = Math.max(250, height - topSafe - bottomSafe);
             cy = topSafe + usableHeight / 2;
             rx = Math.min((width / 2) - 55, usableHeight * 0.55);
             ry = (usableHeight / 2) - 28;
         } else {
-            cy = height * 0.54;
-            const radiusFactor = 0.34;
+            cy = height * 0.52;
+            const radiusFactor = 0.33;
             rx = Math.min(width, height) * radiusFactor;
             ry = Math.min(width, height) * radiusFactor;
         }
