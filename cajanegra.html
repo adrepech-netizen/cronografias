@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Herramienta de Análisis - Cronografías</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
@@ -11,12 +11,13 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background-color: #ffffff !important; 
             overflow: hidden; color: #333; 
+            touch-action: manipulation;
         }
-        #main-wrapper { position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; }
+        #main-wrapper { position: relative; width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
         canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 0; }
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
         
-        .header-container { width: 100%; display: flex; justify-content: center; padding-top: 10px; pointer-events: auto; }
+        .header-container { width: 100%; display: flex; justify-content: center; padding-top: 10px; pointer-events: auto; box-sizing: border-box; }
         .title-box { 
             text-align: center; 
             background: rgba(255,255,255,0.95); 
@@ -27,6 +28,8 @@
             z-index: 20;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             border: 1px solid rgba(0,0,0,0.05);
+            max-width: 92%;
+            box-sizing: border-box;
         }
         .title-box h1 { margin: 0; font-size: 1.2rem; font-weight: 800; color: #2d3436; text-transform: uppercase; }
         .title-box h2 { margin: 0; font-size: 0.78rem; font-weight: 500; color: #636e72; }
@@ -90,6 +93,7 @@
             padding: 8px 18px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             backdrop-filter: blur(5px); z-index: 30; pointer-events: auto;
             display: flex; align-items: center; gap: 12px; border: 1px solid rgba(0,0,0,0.05);
+            box-sizing: border-box;
         }
         .play-btn { background: #0984e3; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(9,132,227,0.3); }
         .slider-container { flex-grow: 1; display: flex; align-items: center; }
@@ -102,17 +106,18 @@
             pointer-events: none; background: rgba(255,255,255,0.88); padding: 2px;
             transform: translate(-50%, -50%); z-index: 5; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             box-sizing: border-box;
+            line-height: 1.1;
         }
         .pct-indicator { font-size: 0.85rem; color: #0984e3; margin-top: 2px; font-weight: 800; }
 
         #data-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; height: 100dvh;
             background: rgba(255, 255, 255, 0.98); z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .modal-content {
             background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 850px;
-            text-align: center; border: 1px solid #eee; height: 75vh; display: flex; flex-direction: column;
+            text-align: center; border: 1px solid #eee; height: 75vh; height: 75dvh; display: flex; flex-direction: column;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box;
         }
         textarea {
@@ -127,22 +132,77 @@
         }
         button.start-btn:hover { background: #0984e3; transform: scale(1.05); }
 
+        /* Ajustes específicos para Tabletas (hasta 900px) */
+        @media (max-width: 900px) {
+            .header-container { padding-top: 8px; justify-content: flex-start; padding-left: 12px; }
+            .title-box { max-width: calc(100% - 115px); text-align: left; padding: 6px 12px; }
+            .title-box h1 { font-size: 0.95rem; }
+            .title-box h2 { font-size: 0.68rem; }
+            .title-box .author-tag { font-size: 0.65rem; }
+            #clock { top: 10px; right: 12px; font-size: 1.15rem; padding: 6px 12px; }
+
+            .controls-area {
+                top: 68px;
+                left: 50%;
+                transform: translateX(-50%);
+                flex-direction: row;
+                width: 94%;
+                max-width: 500px;
+                justify-content: center;
+                gap: 8px;
+            }
+            .filter-card {
+                flex: 1;
+                padding: 4px 8px;
+                border-radius: 10px;
+            }
+            .filter-label { font-size: 0.58rem; }
+            .custom-select { font-size: 0.68rem; padding: 4px 6px; }
+            .label { width: 82px; height: 42px; font-size: 0.58rem; }
+            .pct-indicator { font-size: 0.76rem; }
+        }
+
+        /* Ajustes específicos para Celulares (hasta 600px) */
         @media (max-width: 600px) {
-            .header-container { padding-top: 45px; }
-            .title-box h1 { font-size: 0.82rem; }
-            .title-box h2 { font-size: 0.62rem; }
-            .title-box .author-tag { font-size: 0.58rem; }
-            .controls-area { top: 50%; left: 8px; transform: translateY(-50%); }
-            .filter-card { padding: 4px 8px; }
-            .filter-label { font-size: 0.55rem; }
-            .custom-select { font-size: 0.62rem; padding: 3px 5px; }
-            #clock { top: 8px; right: 8px; font-size: 0.95rem; padding: 3px 8px; border-radius: 8px; }
-            .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 90%; }
+            .header-container { padding-top: 8px; padding-left: 8px; }
+            .title-box { max-width: calc(100% - 88px); padding: 5px 10px; border-radius: 10px; }
+            .title-box h1 { font-size: 0.78rem; }
+            .title-box h2 { font-size: 0.58rem; }
+            .title-box .author-tag { font-size: 0.56rem; margin-top: 2px; }
+            
+            #clock { top: 8px; right: 8px; font-size: 0.95rem; padding: 5px 9px; border-radius: 10px; }
+            
+            .controls-area {
+                top: 60px;
+                width: 95%;
+                gap: 6px;
+            }
+            .filter-card { padding: 4px 6px; border-radius: 8px; }
+            .filter-label { font-size: 0.5rem; letter-spacing: 0; }
+            .custom-select { font-size: 0.62rem; padding: 3px 4px; }
+
+            .timeline-wrapper { bottom: 12px; padding: 6px 12px; width: 92%; }
             .play-btn { width: 28px; height: 28px; font-size: 0.75rem; }
-            .label { width: 70px; height: 40px; font-size: 0.5rem; border-radius: 8px; }
-            .pct-indicator { font-size: 0.68rem; margin-top: 1px; }
-            .modal-content { width: 92%; height: 85vh; padding: 15px; }
+            
+            .label { width: 64px; height: 34px; font-size: 0.48rem; border-radius: 7px; padding: 1px; }
+            .pct-indicator { font-size: 0.62rem; margin-top: 1px; }
+            
+            .modal-content { width: 92%; height: 85dvh; padding: 15px; }
             button.start-btn { padding: 10px 25px; font-size: 0.95rem; }
+        }
+
+        /* Ajustes para Celular en horizontal (Landscape con poca altura) */
+        @media (max-height: 500px) {
+            .header-container { padding-top: 5px; }
+            .title-box { padding: 4px 10px; }
+            .title-box h1 { font-size: 0.75rem; }
+            .title-box h2, .title-box .author-tag { display: none; }
+            .controls-area { top: 42px; flex-direction: row; width: auto; max-width: 60%; }
+            .filter-card { flex-direction: row; padding: 2px 6px; gap: 4px; }
+            .filter-label { display: none; }
+            .timeline-wrapper { bottom: 6px; padding: 4px 10px; }
+            .label { width: 62px; height: 30px; font-size: 0.46rem; }
+            .pct-indicator { font-size: 0.58rem; margin-top: 0; }
         }
     </style>
 </head>
@@ -171,8 +231,8 @@
     <div id="ui-layer">
         <div class="header-container">
             <div class="title-box">
-                <h1>Cronografía de Uso del Tiempo</h1>
-                <h2>Análisis Sociológico de Pobreza de Tiempo</h2>
+                <h1>Cronografía</h1>
+                <h2>Análisis sobre uso del tiempo</h2>
                 <div class="author-tag">Autor: Dr. Adrián Eduardo Pech Quijano</div>
             </div>
         </div>
@@ -253,8 +313,16 @@
     let height = window.innerHeight;
     let canvas = document.getElementById("canvas");
     let ctx = canvas.getContext("2d");
-    canvas.width = width;
-    canvas.height = height;
+
+    function configurarCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    configurarCanvas();
 
     let timeSlots = [];
     let nodes = [];
@@ -266,13 +334,37 @@
     let labelsElements = {};
 
     function calcularPosicionesHubs() {
+        const isMobile = width <= 600;
+        const isTablet = width > 600 && width <= 900;
+        const isLandscapeShort = height <= 500;
+
         const cx = width / 2;
-        const isMobile = width < 600;
-        const cy = isMobile ? height * 0.56 : height * 0.54;
-        
-        const radiusFactor = isMobile ? 0.30 : 0.34;
-        const rx = Math.min(width, height) * radiusFactor;
-        const ry = Math.min(width, height) * radiusFactor;
+        let cy, rx, ry;
+
+        if (isLandscapeShort) {
+            cy = height * 0.54;
+            rx = (width / 2) - 45;
+            ry = (height * 0.34);
+        } else if (isMobile) {
+            const topSafe = 118;
+            const bottomSafe = 72;
+            const usableHeight = Math.max(200, height - topSafe - bottomSafe);
+            cy = topSafe + usableHeight / 2;
+            rx = (width / 2) - 38;
+            ry = (usableHeight / 2) - 24;
+        } else if (isTablet) {
+            const topSafe = 130;
+            const bottomSafe = 80;
+            const usableHeight = Math.max(250, height - topSafe - bottomSafe);
+            cy = topSafe + usableHeight / 2;
+            rx = Math.min((width / 2) - 55, usableHeight * 0.55);
+            ry = (usableHeight / 2) - 28;
+        } else {
+            cy = height * 0.54;
+            const radiusFactor = 0.34;
+            rx = Math.min(width, height) * radiusFactor;
+            ry = Math.min(width, height) * radiusFactor;
+        }
 
         const centroHub = hubs.find(h => h.id === "Traslado");
         if (centroHub) {
@@ -357,7 +449,7 @@
 
         let conteo = {};
         hubs.forEach(h => conteo[h.id] = 0);
-        let isMobile = width < 600;
+        let isMobile = width <= 600;
 
         let filteredNodes = nodes.filter(n => currentGenderFilter === "Todos" || n.gender === currentGenderFilter);
 
@@ -373,7 +465,7 @@
             let hub = hubs.find(h => h.id === hubId);
             if (hub) {
                 let angle = Math.random() * 2 * Math.PI;
-                let maxSpread = isMobile ? 14 : 24;
+                let maxSpread = isMobile ? 12 : 24;
                 let r = Math.random() * maxSpread;
                 node.targetX = hub.x + r * Math.cos(angle);
                 node.targetY = hub.y + r * Math.sin(angle);
@@ -423,7 +515,7 @@
 
     function render() {
         ctx.clearRect(0, 0, width, height);
-        let particleRadius = width < 600 ? 3 : 4;
+        let particleRadius = width <= 600 ? 3 : 4;
 
         nodes.forEach(node => {
             node.x += (node.targetX - node.x) * 0.1;
@@ -443,14 +535,15 @@
         requestAnimationFrame(render);
     }
 
-    window.addEventListener("resize", () => {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
+    function manejarRedimension() {
+        configurarCanvas();
         calcularPosicionesHubs();
         actualizarEtiquetasUI();
-    });
+        actualizarEstadoTiempo();
+    }
+
+    window.addEventListener("resize", manejarRedimension);
+    window.addEventListener("orientationchange", () => setTimeout(manejarRedimension, 150));
 </script>
 </body>
 </html>
